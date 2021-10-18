@@ -1,6 +1,6 @@
 package com.basic.collection;
 
-import javax.swing.text.html.Option;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Iterator;
 /**
@@ -11,14 +11,14 @@ import java.util.Iterator;
  */
 
 public class LinkedList<T> implements Iterable<T> {
-    private Node head;
-    private Node tail;
+    private Node<T> head;
+    private Node<T> tail;
     private int size;
 
     /**
-     * Class for implementing node in linked list
+     * Class for implementing Node in linked list
      */
-      static class Node<T> {
+     static class Node<T> {
         private T data;
         private Node<T> prev;
         private Node<T> next;
@@ -28,23 +28,9 @@ public class LinkedList<T> implements Iterable<T> {
         }
 
         /**
-         * Print out node info.
+         * Get data of current node
          *
-         * @return void
-         */
-        @Override
-        public String toString() {
-            return "Node{" +
-                    "data=" + data +
-                    ", prev=" + prev +
-                    ", next=" + next +
-                    '}';
-        }
-
-        /**
-         * Get data
-         *
-         * @return data
+         * @return current Node's data
          */
         public T getData() {
             return data;
@@ -69,9 +55,90 @@ public class LinkedList<T> implements Iterable<T> {
         }
     }
 
+    /**
+     *
+     * @return Returns an CustomListIterator over elements of type T.
+     */
     @Override
     public Iterator<T> iterator() {
-        return new ListIterator<T>(this);
+        return new CustomListIterator<T>(this);
+    }
+
+    /**
+     * Custom ListIterator over elements in the linkedlist of type T
+     */
+    private class CustomListIterator<T> implements Iterator<T> {
+        // if Node is not inner class, can be Node<T>
+        // if Node is inner class, then LinkedList<T>.Node<T>
+        // or make it static inner class, then can be LinkedList.Node<T>
+        // maybe because T in Node doesnt dependent on LinkedList's T
+        LinkedList.Node<T> current;
+
+        /**
+         * Constructor
+         * @param list
+         */
+        public CustomListIterator(LinkedList<T> list) {
+            current = list.getHead();
+        }
+
+        /**
+         *
+         * @return true if current node has next
+         */
+        @Override
+        public boolean hasNext() {
+            return current.getNext() != null;
+        }
+
+        /**
+         *
+         * @return true if current node has previous
+         */
+        public boolean hasPrev() {
+            return current.getPrev() != null;
+        }
+
+        /**
+         *
+         * @return data of next Node
+         */
+        @Override
+        public T next() {
+            current = current.getNext();
+            T data;
+            if (current != null) {
+                data = current.getData();
+            } else {
+                throw new NoSuchElementException("No Such Element");
+            }
+            return data;
+        }
+
+        /**
+         *
+         * @return data of previous Node
+         */
+        public T prev() {
+            current = current.getPrev();
+            T data;
+            if (current != null) {
+                data = current.getData();
+            } else {
+                throw new NoSuchElementException("No Such Element");
+            }
+            return data;
+        }
+    };
+
+
+    @Override
+    public String toString() {
+        for (int i = 0; i < this.getSize(); i++) {
+            System.out.println(this.getNode(i).get().getData());
+//            System.out.println(this.getNode(i).get().hashCode());
+        }
+        return "Finished";
     }
 
     /**
@@ -149,7 +216,7 @@ public class LinkedList<T> implements Iterable<T> {
      * @param data to add at the last of the list
      * @return true if added successfully
      */
-    public Boolean addLast(T data) {
+    public boolean addLast(T data) {
         Node<T> node = new Node(data);
         if(isEmpty()) {
             head = node;
@@ -168,58 +235,56 @@ public class LinkedList<T> implements Iterable<T> {
      * @return tail node of the list
      */
 
-//    public Optional<Node> removeLast() {
-//        if(head.next != null) {
-//            Node newLastNode = tail.prev;
-//            newLastNode.next = null; // remove
-//            tail.prev = null; // remove
-//            tail = newLastNode; // update tail pointer
-//        } else {
-//            emptyList();
-//        }
-//        size--;
-//        return Optional.ofNullable(tail);
-//    }
+    public Optional<Node<T>> removeLast() {
+        tail = tail.prev;
+        //not last node of the list
+        if (tail != null) {
+            Node<T> temp = tail.next;
+            temp.prev = null;
+            tail.next = null;
+        }
+        size--;
+        return Optional.ofNullable(tail);
+    }
 
     /**
      * Add Node node at the start of the linked list.
      *
-     * <p>Use {@link #addStart(Node node)} to add at the last linked list.
+     * <p>Use {@link #addStart(Object node)} to add at the last linked list.
      *
-     * @param node to add at the start of the list
+     * @param data of Node add to start of the list
      * @return true if added successfully
      */
-//    public Boolean addStart(Node node) {
-//        if(isEmpty()){
-//            firstNode(node);
-//        } else {
-//            // head points to later node, add node before the node that head pointer points to
-//            node.next = head;
-//            node.prev = null;
-//            head.prev = node;
-//            head = node; // update head pointer
-//        }
-//        size++;
-//        return true;
-//    }
+    public boolean addStart(T data) {
+        Node<T> node = new Node(data);
+        if(isEmpty()) {
+            head = node;
+        } else {
+            // head points to later node, add node before the node that head pointer points to
+            node.next = head;
+            node.prev = null;
+            head.prev = node;
+            head = node; // update head pointer
+        }
+        size++;
+        return true;
+    }
 
     /**
      * Remove node from start of the linked list
      *
      * @return head of the list
      */
-//    public Optional<Node> removeStart() {
-//        if(head.next != null) {
-//            Node newFirstNode = head.next;
-//            head.next = null; // remove
-//            newFirstNode.prev = null; // remove
-//            head = newFirstNode; // update first
-//        } else {
-//            emptyList();
-//        }
-//        size--;
-//        return Optional.ofNullable(head);
-//    }
+    public Optional<Node<T>> removeStart() {
+        head = head.next;
+        if(head != null) {
+            Node<T> temp = head.prev;
+            temp.next = null;
+            head.prev = null;
+        }
+        size--;
+        return Optional.ofNullable(head);
+    }
 
     /**
      * Add Node node at the index (i th) of linked list.
@@ -238,33 +303,26 @@ public class LinkedList<T> implements Iterable<T> {
         if (index > length) {
             throw new IndexOutOfBoundsException("Index Exceed List Length");
         }
-        // Empty list
-        if (isEmpty()) {
+        if (isEmpty()) { // Empty list
             head = node;
             tail = node;
-        } else {
+        } else if (index == 0) { // add first
+            node.next = head;
+            head.prev = node;
+            head = node;
+        } else if (index == length) { // add last
+            tail.next = node;
+            node.prev = tail;
+            tail = node;
+        } else { // general case
             Node<T> current = head;
-
-            while (index > 0) {
+            while (index > 0 && current.next != null) {
                 current = current.next;
                 index--;
             }
-            // if current doesnt point to any node, add last
-            if (current == null) {
-                node.prev = tail;
-                node.next = null;
-                tail = node;
-            } else {
-                // index between 0 and size, not include index == size (add last)
-                if ( current.prev != null) { // not the first node
-                    //setup with previous node
-                    current.prev.next = node;
-                    node.prev = current.prev;
-                } else { // first node
-                    head = node;
-                    node.prev = null;
-                }
-                // set up with the node after
+            if (current.next != null) {
+                node.prev = current.prev;
+                current.prev.next = node;
                 node.next = current;
                 current.prev = node;
             }
@@ -277,45 +335,40 @@ public class LinkedList<T> implements Iterable<T> {
      * @param index to remove
      * @return the element previously at the specified position (deleted one)
      */
-//    public Optional<Node> remove(int index) {
-//        int length = getSize();
-//        Node deletedNode = null;
-//        if(isEmpty()){
-//            System.out.println("No elements in list");
-//        } else if (index < 0) {
-//            System.out.println("Invalid index");
-//        } else {
-//            if (index == 0) {
-//                deletedNode = head;
-//                // add first
-//                removeStart();
-//            } else if (index == length) {
-//                deletedNode = tail;
-//                // add last
-//                removeLast();
-//            } else {
-//                Node deletePoint = head;
-//                // find element at index
-//                while (index > 0) {
-//                    deletePoint = deletePoint.next;
-//                    if (deletePoint == null) {
-//                        System.out.println("Invalid index: exceed the length");
-//                        break;
-//                    }
-//                    index--;
-//                }
-//                Node previous = deletePoint.prev;
-//                deletedNode = deletePoint;
-//                // set up previous and next node
-//                previous.next = deletePoint.next;
-//                deletePoint.next.prev = previous;
-//                // remove
-//                deletePoint.prev = null;
-//                deletePoint.next = null;
-//            }
-//        }
-//        return Optional.ofNullable(deletedNode);
-//    }
+    public Optional<Node<T>> remove(int index) {
+        int length = getSize();
+        Node<T> deletedNode;
+        if (isEmpty()) {
+            throw new RuntimeException("List is empty");
+        }
+        if (index < 0 || index > length - 1) {
+            throw new IllegalArgumentException("Invalid Index");
+        }
+        if (index == 0) { // remove first
+            deletedNode = head;
+            removeStart();
+        } else if (index == length) { // remove last
+            deletedNode = tail;
+            removeLast();
+        } else { // general case
+            Node<T> deletePoint = head;
+            // find element at index
+            while (index > 0) {
+                deletePoint = deletePoint.next;
+                index--;
+            }
+            deletedNode = deletePoint;
+            Node<T> previous = deletePoint.prev;
+            // set up previous and next node
+            previous.next = deletePoint.next;
+            deletePoint.next.prev = previous;
+            // remove
+            deletePoint.prev = null;
+            deletePoint.next = null;
+            size--;
+        }
+        return Optional.ofNullable(deletedNode);
+    }
 
     /**
      *
@@ -371,39 +424,4 @@ public class LinkedList<T> implements Iterable<T> {
 
 }
 
-
-
-class ListIterator<T> implements Iterator<T> {
-    // if Node is not inner class, can be Node<T>
-    // if Node is inner class, then LinkedList<T>.Node<T>
-    // or make it static inner class, then can be LinkedList.Node<T>
-    // maybe because T in Node doesnt dependent on LinkedList's T
-    LinkedList.Node<T> current;
-
-    public ListIterator(LinkedList<T> list) {
-        current = list.getHead();
-    }
-
-    @Override
-    public boolean hasNext() {
-        return current.getNext() != null;
-    }
-
-    public boolean hasPrev() {
-        return current.getPrev() != null;
-    }
-
-    @Override
-    public T next() {
-        T data = current.getData();
-        current = current.getNext();
-        return data;
-    }
-
-    public T prev() {
-        T data = current.getData();
-        current = current.getPrev();
-        return data;
-    }
-};
 

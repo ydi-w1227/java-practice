@@ -6,14 +6,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-// e.g. Assert.assertEquals("10 x 5 must be 50", 50, tester.multiply(10, 5));
-//Should_ThrowException_When_AgeLessThan18
-//Should_FailToWithdrawMoney_ForInvalidAccount
-//Should_FailToAdmit_IfMandatoryFieldsAreMissing
+// removeLast necessary to be Optional<Node<T>> and here use LinkedList.Node<String>
+// if removeLast uses Optional<Node> or Optional<LinkedList.Node> is wrong
+// LinkedList.Node means LinkedList.Node
 /**
  * Test class for testing linked list methods
  * This class is not thread safe
@@ -24,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class TestLinkedList {
     LinkedList linkedList;
-//    LinkedList.Node node = linkedList.new Node("First Node");
 
     @Nested
     @DisplayName("Linked list tests")
@@ -33,12 +32,120 @@ public class TestLinkedList {
         @DisplayName("Set up linked list")
         void init() {
             linkedList = new LinkedList();
+            // initialize a node which is not in linkedlist
+            // LinkedList.Node node = linkedList.new Node("First Node");
             assertTrue(linkedList.isEmpty());
+        }
+
+
+        @Test
+        @DisplayName("Add Node at the start of the linked list")
+        void shouldAddNodeAtStartOfLinkedList() {
+            linkedList.addStart("First Node");
+            linkedList.addStart("Second Node");
+            linkedList.addStart("Third Node");
+            assertEquals(3, linkedList.getSize());
+            Optional<LinkedList.Node<String>> rlt = linkedList.getNode(0);
+            assertEquals("Third Node", rlt.isPresent() ? rlt.get().getData() : Optional.empty());
+            Iterator<String> iterator = linkedList.iterator();
+            if (iterator.hasNext()) {
+                Optional<LinkedList.Node<String>> rlt2 = linkedList.getNode(0);
+                assertEquals("Second Node", rlt2.isPresent() ?  iterator.next() : Optional.empty());
+                assertEquals("First Node", rlt2.isPresent() ?  iterator.next() : Optional.empty());
+            }
+        }
+
+        @Test
+        @DisplayName("Add Node at the last of the linked list")
+        void shouldAddNodeAtLastOfLinkedList() {
+            linkedList.addLast("First Node");
+            linkedList.addLast("Second Node");
+            linkedList.addLast("Third Node");
+            assertEquals(3, linkedList.getSize());
+            Optional<LinkedList.Node<String>> rlt = linkedList.getNode(0);
+            assertEquals("First Node", rlt.isPresent() ? rlt.get().getData() : Optional.empty());
+            Iterator<String> iterator = linkedList.iterator();
+            if (iterator.hasNext()) {
+                Optional<LinkedList.Node<String>> rlt2 = linkedList.getNode(0);
+                assertEquals("Second Node", rlt2.isPresent() ?  iterator.next() : Optional.empty());
+                assertEquals("Third Node", rlt2.isPresent() ?  iterator.next() : Optional.empty());
+            }
+        }
+
+        @Test
+        @DisplayName("Add Node at invalid index of the linked list")
+        void shouldThrowExceptionWhenAddNodeAtInvalidIndex() {
+            Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+                linkedList.add("First Node", -1);
+            });
+            assertEquals("Invalid Index", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Add Node at index larger than length of the linked list")
+        void shouldThrowExceptionWhenAddNodeAtOutOfRangeIndex() {
+            Exception exception = assertThrows(IndexOutOfBoundsException.class, () -> {
+                linkedList.add("First Node", 10);
+            });
+            assertEquals("Index Exceed List Length", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Add Node at valid index in order -- add last")
+        void shouldAddNodeAtValidIndexACS() {
+            linkedList.add("First Node", 0);
+            linkedList.add("Second Node", 1);
+            linkedList.add("Third Node", 2);
+            assertEquals(3, linkedList.getSize());
+            Optional<LinkedList.Node<String>> rlt = linkedList.getNode(0);
+            assertEquals("First Node", rlt.isPresent() ? rlt.get().getData() : Optional.empty());
+            Iterator<String> iterator = linkedList.iterator();
+            if (iterator.hasNext()) {
+                Optional<LinkedList.Node<String>> rlt2 = linkedList.getNode(0);
+                assertEquals("Second Node", rlt2.isPresent() ?  iterator.next() : Optional.empty());
+                assertEquals("Third Node", rlt2.isPresent() ?  iterator.next() : Optional.empty());
+            }
+        }
+
+        @Test
+        @DisplayName("Add Node at valid index in random order -- add at first")
+        void shouldAddNodeAtValidIndexInOrderDESC() {
+            linkedList.add("First Node", 0);
+            linkedList.add("Second Node", 0);
+            linkedList.add("Third Node", 0);
+            assertEquals(3, linkedList.getSize());
+            Optional<LinkedList.Node<String>> rlt = linkedList.getNode(0);
+            assertEquals("Third Node", rlt.isPresent() ? rlt.get().getData() : Optional.empty());
+            Iterator<String> iterator = linkedList.iterator();
+            if (iterator.hasNext()) {
+                Optional<LinkedList.Node<String>> rlt2 = linkedList.getNode(0);
+                assertEquals("Second Node", rlt2.isPresent() ?  iterator.next() : Optional.empty());
+                assertEquals("First Node", rlt2.isPresent() ?  iterator.next() : Optional.empty());
+            }
+        }
+
+        @Test
+        @DisplayName("Add Node at valid index in random order -- add in between")
+        void shouldAddNodeAtValidIndexInRandomOrder() {
+            linkedList.add("First Node", 0);
+            linkedList.add("Second Node", 1);
+            linkedList.add("Third Node", 2);
+            linkedList.add("Forth Node", 1);
+            assertEquals(4, linkedList.getSize());
+            Optional<LinkedList.Node<String>> rlt = linkedList.getNode(0);
+            assertEquals("First Node", rlt.isPresent() ? rlt.get().getData() : Optional.empty());
+            Iterator<String> iterator = linkedList.iterator();
+            if (iterator.hasNext()) {
+                Optional<LinkedList.Node<String>> rlt2 = linkedList.getNode(0);
+                assertEquals("Forth Node", rlt2.isPresent() ?  iterator.next() : Optional.empty());
+                assertEquals("Second Node", rlt2.isPresent() ?  iterator.next() : Optional.empty());
+                assertEquals("Third Node", rlt2.isPresent() ?  iterator.next() : Optional.empty());
+            }
         }
 
         @Test
         @DisplayName("Get node at invalid index - exception")
-        void should_ThrowException_When_IndexInvalid() {
+        void shouldThrowExceptionWhenIndexInvalid() {
             linkedList.add("First Node", 0);
             assertEquals(1, linkedList.getSize());
             Exception exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -49,16 +156,16 @@ public class TestLinkedList {
 
         @Test
         @DisplayName("Get node at valid index - return data")
-        void should_GetNodeData_AtIndex() {
+        void shouldGetNodeDataAtIndex() {
             linkedList.add("First Node", 0);
             assertEquals(1, linkedList.getSize());
-            Optional<LinkedList.Node> rlt = linkedList.getNode(0);
+            Optional<LinkedList.Node<String>> rlt = linkedList.getNode(0);
             assertEquals("First Node", rlt.isPresent() ? rlt.get().getData() : Optional.empty());
         }
 
         @Test
         @DisplayName("Get node at index exceeded list length - null")
-        void should_ReturnNull_When_IndexExceedLength() {
+        void shouldReturnNullWhenIndexExceedLength() {
             linkedList.add("First Node", 0);
             assertEquals(1, linkedList.getSize());
             Exception exception = assertThrows(IndexOutOfBoundsException.class, () -> {
@@ -69,174 +176,127 @@ public class TestLinkedList {
 
         @Test
         @DisplayName("Get node at last of list - empty list")
-        void should_AddNode_AtLast_ToEmptyLinkedList() {
+        void shouldAddNodeAtLastToEmptyLinkedList() {
             linkedList.addLast("First Node");
             assertEquals(1, linkedList.getSize());
-            Optional<LinkedList.Node> rlt = linkedList.getNode(0);
+            Optional<LinkedList.Node<String>> rlt = linkedList.getNode(0);
             assertEquals("First Node", rlt.isPresent() ? rlt.get().getData() : Optional.empty());
         }
 
         @Test
         @DisplayName("Get node at last of list - non empty list")
-        void should_AddNode_AtLast_ToNonEmptyLinkedList() {
+        void shouldAddNodeAtLastToNonEmptyLinkedList() {
             linkedList.add("First Node",0);
             linkedList.addLast("Second Node");
             assertEquals(2, linkedList.getSize());
-            Optional<LinkedList.Node> rlt = linkedList.getNode(0);
-            Iterator<LinkedList> iterator = linkedList.iterator();
+            Optional<LinkedList.Node<String>> rlt = linkedList.getNode(0);
+            assertEquals("First Node", rlt.isPresent() ? rlt.get().getData() : Optional.empty());
+            // needs to specify type like String??
+            Iterator<String> iterator = linkedList.iterator();
             if (iterator.hasNext()) {
-                assertEquals("First Node", rlt.isPresent() ? iterator.next() : Optional.empty());
                 assertEquals("Second Node", rlt.isPresent() ?  iterator.next() : Optional.empty());
             }
+            Exception exception = assertThrows(NoSuchElementException.class, () -> {
+                iterator.next();
+            });
+            assertEquals("No Such Element", exception.getMessage());
         }
 
-//        @Test
-//        @DisplayName("Empty list from last")
-//        void addLastTest_1() {
-//            linkedList.addLast(new Node("First Node"));
-//            System.out.println("Before remove");
-//            linkedList.toPrint();
-//            Optional<Node> rlt = linkedList.removeLast();
-//            assertEquals(Optional.empty(), rlt.isPresent() ? rlt.get().data : Optional.empty());
-//            System.out.println("After remove");
-//            assertEquals(0, linkedList.getSize());
-//            linkedList.toPrint();
-//        }
-//
-//        @Test
-//        @DisplayName("Add and remove from last")
-//        void addLastTest_2() {
-//            linkedList.addLast(new Node("First Node"));
-//            linkedList.addLast(new Node("Second Node"));
-//            linkedList.addLast(new Node("Third Node"));
-//            assertEquals(3, linkedList.getSize());
-//            System.out.println("====Before remove====");
-//            linkedList.toPrint();
-//            Optional<Node> rlt = linkedList.removeLast();
-//            assertEquals("Second Node", rlt.isPresent() ? rlt.get().data : Optional.empty());
-//            assertEquals(2, linkedList.getSize());
-//            System.out.println("====After remove====");
-//            linkedList.toPrint();
-//        }
-//
-//        @Test
-//        @DisplayName("Empty list from start")
-//        void addStartTest_1() {
-//            linkedList.addStart(new Node("First Node"));
-//            System.out.println("Before remove");
-//            linkedList.toPrint();
-//            Optional<Node> rlt = linkedList.removeStart();
-//            assertEquals(Optional.empty(), rlt.isPresent() ? rlt.get().data : Optional.empty());
-//            assertEquals(false, rlt.isPresent());
-//            System.out.println("After remove");
-//            assertEquals(0, linkedList.getSize());
-//            linkedList.toPrint();
-//        }
-//
-//        @Test
-//        @DisplayName("Add and remove at start")
-//        void addStartTest_2() {
-//            linkedList.addStart(new Node("First Node"));
-//            linkedList.addStart(new Node("Second Node"));
-//            linkedList.addStart(new Node("Third Node"));
-//            assertEquals(3, linkedList.getSize());
-//            System.out.println("====Before remove====");
-//            linkedList.toPrint();
-//            Optional<Node> rlt = linkedList.removeStart();
-//            assertEquals(true, rlt.isPresent());
-//            assertEquals("Second Node", rlt.isPresent() ? rlt.get().data : Optional.empty());
-//            assertEquals(2, linkedList.getSize());
-//            System.out.println("====After remove====");
-//            linkedList.toPrint();
-//        }
-//
-//        @Test
-//        @DisplayName("Add nodes at index")
-//        void addTest() {
-//            linkedList.add(new Node("First Node"), 0);
-//            linkedList.add(new Node("Second Node"), 0);
-//            linkedList.add(new Node("Third Node"), 1);
-//            linkedList.toPrint();
-//            assertEquals(3, linkedList.getSize());
-//
-//        }
-//
-//        @Test
-//        @DisplayName("Get node at index")
-//        void getTest() {
-//            linkedList.add(new Node("First Node"), 0);
-//            linkedList.add(new Node("Second Node"), 0);
-//            linkedList.add(new Node("Third Node"), 1);
-//            linkedList.addLast(new Node("Fourth Node"));
-//            linkedList.addLast(new Node("Fifth Node"));
-//            linkedList.toPrint();
-//            Optional<Node> rlt = linkedList.getNode(5);
-//            assertEquals( Optional.empty(), rlt.isPresent() ? rlt.get().data : Optional.empty());
-//            Optional<Node> rlt2 = linkedList.getNode(0);
-//            assertEquals("Second Node", rlt2.isPresent() ? rlt2.get().data : Optional.empty());
-//            assertEquals(5, linkedList.getSize());
-//        }
-//
-//        @Test
-//        @DisplayName("Remove node at index")
-//        void removeTest() {
-//            linkedList.add(new Node("First Node"), 0);
-//            linkedList.add(new Node("Second Node"), 0);
-//            linkedList.add(new Node("Third Node"), 1);
-//            System.out.println("====Before remove====");
-//            linkedList.toPrint();
-//            assertEquals("Third Node", linkedList.remove(1).get().data);
-//            System.out.println("====After remove====");
-//            linkedList.toPrint();
-//            assertEquals(3, linkedList.getSize());
-//        }
-//
-//        @Test
-//        @DisplayName("Get middle node of the list - odd")
-//        void getMiddleTest_1() {
-//            Optional<Node> rlt = linkedList.getMiddle();
-//            assertEquals(Optional.empty(), rlt.isPresent() ? rlt.get().data : Optional.empty());
-//            linkedList.addLast(new Node("First Node"));
-//            linkedList.addLast(new Node("Second Node"));
-//            linkedList.addLast(new Node("Third Node"));
-//            linkedList.addLast(new Node("Fourth Node"));
-//            linkedList.addLast(new Node("Fifth Node"));
-//            linkedList.toPrint();
-//            Optional<Node> rlt2 = linkedList.getMiddle();
-//            assertEquals("Third Node", rlt2.isPresent() ? rlt2.get().data : Optional.empty());
-//            assertEquals(5, linkedList.getSize());
-//        }
-//
-//        @Test
-//        @DisplayName("Get middle node of the list - even")
-//        void getMiddleTest_2() {
-//            Optional<Node> rlt = linkedList.getMiddle();
-//            assertEquals(Optional.empty(), rlt.isPresent() ? rlt.get().data : Optional.empty());
-//            linkedList.addLast(new Node("First Node"));
-//            linkedList.addLast(new Node("Second Node"));
-//            linkedList.addLast(new Node("Third Node"));
-//            linkedList.addLast(new Node("Fourth Node"));
-//            linkedList.addLast(new Node("Fifth Node"));
-//            linkedList.addLast(new Node("Sixth Node"));
-//            linkedList.toPrint();
-//            Optional<Node> rlt3 = linkedList.getMiddle();
-//            assertEquals("Fourth Node", rlt3.isPresent() ? rlt3.get().data : Optional.empty());
-//            assertEquals(6, linkedList.getSize());
-//        }
-//
-//        @Test
-//        @DisplayName("add node at index - optimized")
-//        void addOptTest() {
-//            linkedList.optimizedAdd(new Node("First Node"),0);
-//            linkedList.optimizedAdd(new Node("Second Node"),0);
-//            linkedList.optimizedAdd(new Node("Third Node"), 2);
-//            // index invalid
-//            linkedList.optimizedAdd(new Node("Fourth Node"),4);
-//            linkedList.toPrint();
-//            assertEquals(3, linkedList.getSize());
-//            Optional<Node> rlt = linkedList.getNode(2);
-//            assertEquals("Third Node", rlt.isPresent() ? rlt.get().data : Optional.empty());
-//        }
+        @Test
+        @DisplayName("Get middle node of the list - odd")
+        void shouldGetMiddleNodeWhenListHasOddNodes() {
+            linkedList.addLast("First Node");
+            linkedList.addLast("Second Node");
+            linkedList.addLast("Third Node");
+            assertEquals(3, linkedList.getSize());
+            Optional<LinkedList.Node<String>> rlt = linkedList.getMiddle();
+            assertEquals("Second Node", rlt.isPresent() ? rlt.get().getData() : Optional.empty());
+        }
+
+        @Test
+        @DisplayName("Get middle node of the list - even")
+        void shouldGetMiddleNodeWhenListHasEvenNodes() {
+            linkedList.addLast("First Node");
+            linkedList.addLast("Second Node");
+            linkedList.addLast("Third Node");
+            linkedList.addLast("Forth Node");
+            assertEquals(4, linkedList.getSize());
+            Optional<LinkedList.Node<String>> rlt3 = linkedList.getMiddle();
+            assertEquals("Third Node", rlt3.isPresent() ? rlt3.get().getData() : Optional.empty());
+        }
+
+        @Test
+        @DisplayName("Empty list from last")
+        void shouldEmptyListByRemoveLastNode() {
+            linkedList.addLast("First Node");
+            assertEquals(1, linkedList.getSize());
+            Optional<LinkedList.Node<String>> rlt = linkedList.removeLast();
+            assertEquals(Optional.empty(), rlt.isPresent() ? rlt.get().getData() : Optional.empty());
+            assertEquals(0, linkedList.getSize());
+        }
+
+        @Test
+        @DisplayName("Empty list from last")
+        void shouldRemoveNodeFromLastofList() {
+            linkedList.addLast("First Node");
+            linkedList.addLast("Second Node");
+            assertEquals(2, linkedList.getSize());
+
+            Optional<LinkedList.Node<String>> rlt = linkedList.removeLast();
+            assertEquals("First Node", rlt.isPresent() ? rlt.get().getData() : Optional.empty());
+            assertEquals(1, linkedList.getSize());
+        }
+
+        @Test
+        @DisplayName("Empty list from start")
+        void shouldEmptyListByRemoveFirstNode() {
+            linkedList.addStart("First Node");
+            assertEquals(1, linkedList.getSize());
+            Optional<LinkedList.Node<String>> rlt = linkedList.removeStart();
+            assertEquals(Optional.empty(), rlt.isPresent() ? rlt.get().getData() : Optional.empty());
+            assertEquals(0, linkedList.getSize());
+        }
+
+        @Test
+        @DisplayName("Empty list from last")
+        void shouldRemoveNodeFromStartofList() {
+            linkedList.addLast("First Node");
+            linkedList.addLast("Second Node");
+            assertEquals(2, linkedList.getSize());
+
+            Optional<LinkedList.Node<String>> rlt = linkedList.removeStart();
+            assertEquals("Second Node", rlt.isPresent() ? rlt.get().getData() : Optional.empty());
+            assertEquals(1, linkedList.getSize());
+        }
+
+        @Test
+        @DisplayName("Remove only node at index")
+        void shouldRemoveOnlyNodeAtIndexofList() {
+            linkedList.add("First Node", 0);
+            assertEquals(1, linkedList.getSize());
+            Optional<LinkedList.Node<String>> removedNode = linkedList.remove(0);
+            assertEquals("First Node", removedNode.get().getData());
+            assertEquals(0, linkedList.getSize());
+        }
+
+        @Test
+        @DisplayName("Remove node at index")
+        void shouldRemoveNodeAtIndexofList() {
+            linkedList.add("First Node", 0);
+            linkedList.add("Second Node", 1);
+            linkedList.add("Third Node", 2);
+            assertEquals(3, linkedList.getSize());
+            Optional<LinkedList.Node<String>> removedNode = linkedList.remove(1);
+            assertEquals("Second Node", removedNode.get().getData());
+            assertEquals(2, linkedList.getSize());
+            Optional<LinkedList.Node<String>> rlt = linkedList.getNode(0);
+            assertEquals("First Node", rlt.isPresent() ? rlt.get().getData() : Optional.empty());
+            Iterator<String> iterator = linkedList.iterator();
+            if (iterator.hasNext()) {
+                Optional<LinkedList.Node<String>> rlt2 = linkedList.getNode(0);
+                assertEquals("Third Node", rlt2.isPresent() ?  iterator.next() : Optional.empty());
+            }
+        }
 
     }
 }
