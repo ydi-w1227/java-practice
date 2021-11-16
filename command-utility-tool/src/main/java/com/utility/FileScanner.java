@@ -27,24 +27,17 @@ public class FileScanner {
                 String line = scan.nextLine().toLowerCase();
 
                 List<String> lineWords = getLineWords(line);
-                System.out.println(Arrays.toString(lineWords.toArray()));
-//                System.out.println(Arrays.toString(lineWords));
                 for(String word: lineWords) {
-                    System.out.println(word);
-
                     // remove any special characters at the end
                     for (int i = 0; i < line.length() - word.length() + 1 ; i++) {
                         int column = -1;
                         String currentStr = line.substring(i, i + word.length());
-                        System.out.println(currentStr);
-
                         if (currentStr.equals(word)) {
-                            column = i;
+                            column = i + 1;
                             String occurrence = "Line: " + lineNumber + " Column: " + column;
-                            System.out.println("word " + word + " :" + lineNumber + ", " + column);
+//                            System.out.println("word " + word + " :" + lineNumber + ", " + column);
                             if (wordByOccurrence.containsKey(word)){ // not first time
-                                List<String> value = wordByOccurrence.get(word);
-                                value.add(occurrence);
+                                wordByOccurrence.get(word).add(occurrence);
                             } else { // first time
                                 List<String> occurrences = new ArrayList<>();
                                 occurrences.add(occurrence);
@@ -54,13 +47,11 @@ public class FileScanner {
                     }
 
                 }
-//                System.out.println("line " + lineNumber + " :" + line);
                 lineNumber++;
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-//        System.out.println(wordByOccurrence.toString());
     }
 
     /**
@@ -87,8 +78,8 @@ public class FileScanner {
     }
 
     /**
-     * Get list of
-     * @param scanLine
+     * get words from a line without duplication
+     * @param line
      * @return
      */
     private List getLineWords(String line) {
