@@ -11,7 +11,7 @@ public class FileScanner {
 //        1. - use map to store
 //        1. key:  word all lowercase
 //        2. value: occurrence
-    Map<String, List<String>> wordByOccurrence = new HashMap<>();
+    Map<String, List<Location>> wordByOccurrence = new HashMap<>();
 
     /**
      * Scan the input file and save with word-occurrence pairs
@@ -27,40 +27,31 @@ public class FileScanner {
                 String line = scan.nextLine().toLowerCase();
 
                 List<String> lineWords = getLineWords(line);
-                System.out.println(Arrays.toString(lineWords.toArray()));
-//                System.out.println(Arrays.toString(lineWords));
                 for(String word: lineWords) {
-                    System.out.println(word);
-
                     // remove any special characters at the end
                     for (int i = 0; i < line.length() - word.length() + 1 ; i++) {
                         int column = -1;
                         String currentStr = line.substring(i, i + word.length());
-                        System.out.println(currentStr);
-
                         if (currentStr.equals(word)) {
-                            column = i;
-                            String occurrence = "Line: " + lineNumber + " Column: " + column;
-                            System.out.println("word " + word + " :" + lineNumber + ", " + column);
+                            column = i + 1;
+                            Location location = new Location(lineNumber, column);
+//                            System.out.println("word " + word + " :" + lineNumber + ", " + column);
                             if (wordByOccurrence.containsKey(word)){ // not first time
-                                List<String> value = wordByOccurrence.get(word);
-                                value.add(occurrence);
+                                wordByOccurrence.get(word).add(location);
                             } else { // first time
-                                List<String> occurrences = new ArrayList<>();
-                                occurrences.add(occurrence);
+                                List<Location> occurrences = new ArrayList<>();
+                                occurrences.add(location);
                                 wordByOccurrence.put(word, occurrences);
                             }
                         }
                     }
 
                 }
-//                System.out.println("line " + lineNumber + " :" + line);
                 lineNumber++;
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-//        System.out.println(wordByOccurrence.toString());
     }
 
     /**
@@ -78,7 +69,7 @@ public class FileScanner {
      * @return all occurrences or "no result found"
      */
     public String checkOccurrences(String word) {
-        List<String> value = wordByOccurrence.get(word);
+        List<Location> value = wordByOccurrence.get(word);
         if (Optional.ofNullable(value).isPresent()) {
             return Arrays.deepToString(value.toArray());
         } else {
@@ -87,8 +78,8 @@ public class FileScanner {
     }
 
     /**
-     * Get list of
-     * @param scanLine
+     * get words from a line without duplication
+     * @param line
      * @return
      */
     private List getLineWords(String line) {
